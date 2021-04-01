@@ -1,13 +1,77 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3 + Vite" />
+  <form @submit.prevent class="new-task-form">
+    <label for="task-label">Task Label</label>
+    <input type="text" id="task-label" v-model="newTaskLabel" />
+
+    <label for="task-type">Task Type:</label>
+    <input
+      list="task-type-list"
+      type="text"
+      id="task-type"
+      v-model="newTaskType"
+    />
+    <datalist id="task-type-list">
+      <option value="Need"></option>
+      <option value="Want"></option>
+    </datalist>
+    <button @click="addNewTask">Add</button>
+  </form>
+
+  <h2>Task List</h2>
+
+  <div class="task-list-wrapper">
+    <section>
+      <h3>Need</h3>
+      <ul>
+        <li v-for="item in needTaskList" :key="item.label">
+          {{ item.label }} ({{ item.type }})
+        </li>
+      </ul>
+    </section>
+    <section>
+      <h3>Want</h3>
+      <ul>
+        <li v-for="item in wantTaskList" :key="item.label">
+          {{ item.label }} ({{ item.type }})
+        </li>
+      </ul>
+    </section>
+  </div>
 </template>
 
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
+<script>
+import { computed, reactive, toRefs } from '@vue/reactivity'
 
-// This starter template is using Vue 3 experimental <script setup> SFCs
-// Check out https://github.com/vuejs/rfcs/blob/script-setup-2/active-rfcs/0000-script-setup.md
+export default {
+  setup() {
+    const state = reactive({
+      newTaskLabel: '',
+      newTaskType: '',
+      taskList: [],
+      needTaskList: computed(() => {
+        return state.taskList.filter(item => item.type === 'Need')
+      }),
+      wantTaskList: computed(() => {
+        return state.taskList.filter(item => item.type === 'Want')
+      })
+    })
+
+    const addNewTask = () => {
+      console.log('test')
+
+      state.taskList.push({
+        label: state.newTaskLabel,
+        type: state.newTaskType
+      })
+    }
+
+    return {
+      ...toRefs(state),
+      addNewTask
+    }
+  }
+}
 </script>
 
 <style>
@@ -18,5 +82,19 @@ import HelloWorld from './components/HelloWorld.vue'
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.new-task-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 640px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.task-list-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 </style>
