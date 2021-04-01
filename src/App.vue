@@ -1,3 +1,37 @@
+<script>
+import { computed, reactive, toRefs } from '@vue/reactivity'
+
+export default {
+  setup() {
+    const state = reactive({
+      newTaskLabel: '',
+      newTaskType: '',
+      newTaskEstimate: 0,
+      taskList: [],
+      needTaskList: computed(() => {
+        return state.taskList.filter(item => item.type === 'Need')
+      }),
+      wantTaskList: computed(() => {
+        return state.taskList.filter(item => item.type === 'Want')
+      })
+    })
+
+    const addNewTask = () => {
+      state.taskList.push({
+        label: state.newTaskLabel,
+        type: state.newTaskType,
+        estimate: state.newTaskEstimate
+      })
+    }
+
+    return {
+      ...toRefs(state),
+      addNewTask
+    }
+  }
+}
+</script>
+
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
   <form @submit.prevent class="new-task-form">
@@ -15,6 +49,10 @@
       <option value="Need"></option>
       <option value="Want"></option>
     </datalist>
+
+    <label for="task-estimate">Estimate:</label>
+    <input type="number" v-model="newTaskEstimate" />
+
     <button @click="addNewTask">Add</button>
   </form>
 
@@ -25,7 +63,7 @@
       <h3>Need</h3>
       <ul>
         <li v-for="item in needTaskList" :key="item.label">
-          {{ item.label }} ({{ item.type }})
+          {{ item.label }} ({{ item.type }}) — {{ item.estimate }} min
         </li>
       </ul>
     </section>
@@ -33,46 +71,12 @@
       <h3>Want</h3>
       <ul>
         <li v-for="item in wantTaskList" :key="item.label">
-          {{ item.label }} ({{ item.type }})
+          {{ item.label }} ({{ item.type }}) — {{ item.estimate }} min
         </li>
       </ul>
     </section>
   </div>
 </template>
-
-<script>
-import { computed, reactive, toRefs } from '@vue/reactivity'
-
-export default {
-  setup() {
-    const state = reactive({
-      newTaskLabel: '',
-      newTaskType: '',
-      taskList: [],
-      needTaskList: computed(() => {
-        return state.taskList.filter(item => item.type === 'Need')
-      }),
-      wantTaskList: computed(() => {
-        return state.taskList.filter(item => item.type === 'Want')
-      })
-    })
-
-    const addNewTask = () => {
-      console.log('test')
-
-      state.taskList.push({
-        label: state.newTaskLabel,
-        type: state.newTaskType
-      })
-    }
-
-    return {
-      ...toRefs(state),
-      addNewTask
-    }
-  }
-}
-</script>
 
 <style>
 #app {
@@ -96,5 +100,9 @@ export default {
 .task-list-wrapper {
   display: grid;
   grid-template-columns: 1fr 1fr;
+}
+
+input {
+  margin-bottom: 1rem;
 }
 </style>
