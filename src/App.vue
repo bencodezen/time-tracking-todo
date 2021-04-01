@@ -4,6 +4,7 @@ import { computed, reactive, toRefs } from '@vue/reactivity'
 export default {
   setup() {
     const state = reactive({
+      dayMinLimit: 1440,
       newTaskLabel: '',
       newTaskType: '',
       newTaskEstimate: 0,
@@ -11,8 +12,26 @@ export default {
       needTaskList: computed(() => {
         return state.taskList.filter(item => item.type === 'Need')
       }),
+      needTaskTotalEstimate: computed(() => {
+        return state.needTaskList.reduce((acc, cv) => {
+          return acc + Number(cv.estimate)
+        }, 0)
+      }),
       wantTaskList: computed(() => {
         return state.taskList.filter(item => item.type === 'Want')
+      }),
+      wantTaskTotalEstimate: computed(() => {
+        return state.wantTaskList.reduce((acc, cv) => {
+          return acc + Number(cv.estimate)
+        }, 0)
+      }),
+      totalEstimatedTime: computed(() => {
+        return state.taskList.reduce((acc, cv) => {
+          return acc + Number(cv.estimate)
+        }, 0)
+      }),
+      remainingTime: computed(() => {
+        return state.dayMinLimit - state.totalEstimatedTime
       })
     })
 
@@ -34,6 +53,8 @@ export default {
 
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
+  <h2>Remaining Time: {{ remainingTime }} min</h2>
+  <h3>Total Estimate: {{ totalEstimatedTime }}</h3>
   <form @submit.prevent class="new-task-form">
     <label for="task-label">Task Label</label>
     <input type="text" id="task-label" v-model="newTaskLabel" />
@@ -60,7 +81,7 @@ export default {
 
   <div class="task-list-wrapper">
     <section>
-      <h3>Need</h3>
+      <h3>Need ({{ needTaskTotalEstimate }})</h3>
       <ul>
         <li v-for="item in needTaskList" :key="item.label">
           {{ item.label }} ({{ item.type }}) — {{ item.estimate }} min
@@ -68,7 +89,7 @@ export default {
       </ul>
     </section>
     <section>
-      <h3>Want</h3>
+      <h3>Want ({{ wantTaskTotalEstimate }})</h3>
       <ul>
         <li v-for="item in wantTaskList" :key="item.label">
           {{ item.label }} ({{ item.type }}) — {{ item.estimate }} min
